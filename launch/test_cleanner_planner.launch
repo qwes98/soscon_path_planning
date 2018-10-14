@@ -1,0 +1,11 @@
+<launch>
+	<arg name="map_file" default="$(find sweeper_simulation)/launch/includes/maps/willow_small.yaml"/>
+
+    <node name="map_server_for_test" pkg="map_server" type="map_server" args="$(arg map_file)">
+        <param name="frame_id" value="s_map" />
+    </node>
+
+    <node name="coverage_path_planning_client" pkg="coverage_path_planning" type="coverage_path_planning_client" output="screen">
+    </node>
+
+</launch>
