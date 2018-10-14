@@ -1,0 +1,6 @@
+<launch>
+
+    <node name="soscon_path_planning_server" pkg="soscon_path_planning" type="soscon_path_planning_server" output="screen">
+    </node>
+
+</launch>

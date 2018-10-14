@@ -1,0 +1,14 @@
+<launch>
+	<arg name="map_file" default="$(find soscon_path_planning)/maps/SOSCON3_map.yaml"/>
+	<!--arg name="map_file" default="$(find cob_default_env_config)/envs/ipa-apartment/map.yaml"/-->
+	<!--arg name="map_file" default="$(find cob_default_env_config)/envs/ipa-kitchen/map.yaml"/-->
+	<!--arg name="map_file" default="$(find cob_default_env_config)/envs/izs-carpark-top/map.yaml"/-->
+
+    <node name="map_server_for_test" pkg="map_server" type="map_server" args="$(arg map_file)">
+    </node>
+    <node name="soscon_path_planning_client" pkg="soscon_path_planning" type="soscon_path_planning_client" output="screen">
+    </node>
+
+	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find soscon_path_planning)/launch/soscon_path_planning.rviz" />
+
+</launch>
