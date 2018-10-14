@@ -343,14 +343,28 @@ void insert_a_star_path(const cv::Mat &_binary, std::deque<cv::Point> &_path, in
 	// FIXME: too big size image -> process died!
 	//G[i][j] denotes the category to which the pixel (i,j) belong to
 	//this will be used map?(start point, end point, free, non-free)
-	int G[rows][cols];
+	//int G[rows][cols];
+	char **G = new char*[rows];
+	for(int i = 0; i < rows; i++) {
+		G[i] = new char[cols];
+	}
+
 	
 	//Parent[i][j] denotes the parent of the pixel (i,j)
-	pair<int,int> Parent[rows][cols];
+	//pair<int,int> Parent[rows][cols];
+	pair<int, int> **Parent = new pair<int, int>*[rows];
+	for(int i = 0; i < rows; i++) {
+		Parent[i] = new pair<int, int>[cols];
+	}
 	
 	//Closed_List[i][j] denotes whether the pixel (i,j) belongs to the closed list(should not be looked at again)
 	//and whose final distance is calculated
-	int Closed_List[rows][cols];
+	//int Closed_List[rows][cols];
+	int **Closed_List = new int*[rows];
+	for(int i = 0; i < rows; i++) {
+		Closed_List[i] = new int[cols];
+	}
+	
 
 	int path_size = _path.size();
 	pair<int,int> start,destination;
@@ -377,7 +391,11 @@ void insert_a_star_path(const cv::Mat &_binary, std::deque<cv::Point> &_path, in
 	};
 	
 	//Distance[i][j] will store the 3 different distance of the pixel(i,j)
-	dist Distance[rows][cols];
+	//dist Distance[rows][cols];
+	dist **Distance= new dist*[rows];
+	for(int i = 0; i < rows; i++) {
+		Distance[i] = new dist[cols];
+	}
 	
 	//Initialisation
 	for(int i=0 ; i<rows ; i++) {
@@ -576,6 +594,18 @@ void insert_a_star_path(const cv::Mat &_binary, std::deque<cv::Point> &_path, in
 	//display_image(image,"Output");
 	//imshow("Output",image); 
 	//waitKey(0);
+
+	// memory deallocation
+	for(int i = 0; i < rows; i++) {
+		delete [] G[i];
+		delete [] Parent[i];
+		delete [] Closed_List[i];
+		delete [] Distance[i];
+	}
+	delete [] G;
+	delete [] Parent;
+	delete [] Closed_List;
+	delete [] Distance;
 }
 
 
