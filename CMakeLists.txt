@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(soscon_path_planning)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -60,10 +60,10 @@ find_package(OpenCV REQUIRED)
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   GetCoveragePath.srv
- )
+# add_service_files(
+#   FILES
+#   GetCoveragePath.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -73,11 +73,11 @@ find_package(OpenCV REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   geometry_msgs
-   nav_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   geometry_msgs
+#   nav_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -109,7 +109,7 @@ find_package(OpenCV REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES coverage_path_planning
 #  CATKIN_DEPENDS actionlib geometry_msgs message_generation nav_core nav_msgs pluginlib roscpp std_srvs tf
 #  DEPENDS system_lib
@@ -122,15 +122,22 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
-	${OpenCV_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/coverage_path_planning.cpp
 # )
+
+add_library(global_planner_lib src/soscon_global_planner.cpp)
+#add_dependencies(global_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(global_planner
+#	${catkin_LIBRARIES}
+#)
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -140,8 +147,9 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(${PROJECT_NAME}_server src/soscon_path_planning_server.cpp src/coveragepathplanning.cpp)
- add_executable(${PROJECT_NAME}_client src/soscon_path_planning_client.cpp)
+
+#add_executable(${PROJECT_NAME}_server src/soscon_path_planning_server.cpp src/coveragepathplanning.cpp)
+#add_executable(${PROJECT_NAME}_client src/soscon_path_planning_client.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -154,17 +162,17 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(${PROJECT_NAME}_server
-   ${catkin_LIBRARIES}
-	 ${OpenCV_LIBS}
- )
- target_link_libraries(${PROJECT_NAME}_client
-   ${catkin_LIBRARIES}
-	 ${OpenCV_LIBS}
- )
+# target_link_libraries(${PROJECT_NAME}_server
+#   ${catkin_LIBRARIES}
+#   ${OpenCV_LIBS}
+#)
+# target_link_libraries(${PROJECT_NAME}_client
+#   ${catkin_LIBRARIES}
+#	 ${OpenCV_LIBS}
+# )
 
-add_dependencies(${PROJECT_NAME}_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME}_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(${PROJECT_NAME}_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(${PROJECT_NAME}_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

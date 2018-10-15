@@ -1,31 +1,28 @@
+#include <pluginlib/class_list_macros.h>
 #include <nav_msgs/GetMap.h>
-#include <ros/ros.h>
-#include <tf/tf.h>
-#include <visualization_msgs/Marker.h>
-#include <visualization_msgs/MarkerArray.h>
-#include "coverage_path_planning/GetCoveragePath.h"
+#include <soscon_path_planning/soscon_global_planner.h>
 
-// Example:
-//////////////////
-// geometry_msgs::Pose  plannerGoal;
-// plannerGoal.position.x = srv.request.goal.pose.position.x;
-// plannerGoal.position.y = srv.request.goal.pose.position.y;
-// plannerGoal.orientation.w = 1.0;
-//
-// geometry_msgs::Vector3 plannerGoalScale;
-// plannerGoalScale.x = 0.2;
-// plannerGoalScale.y = 0.2;
-// plannerGoalScale.z = 0.2;
-//
-// std_msgs::ColorRGBA plannerGoalColor;
-// plannerGoalColor.a = 1.0;
-// plannerGoalColor.b = 1.0;
-//
-// int32_t plannerGoalId = path_size + 1;
-//
-// visualization_msgs::Marker markerSphereGoal = createMarker("PlannerGoal",visualization_msgs::Marker::SPHERE,plannerGoal,plannerGoalScale,plannerGoalColor,plannerGoalId, srv.request.map.header.frame_id);
-//////////////////
-visualization_msgs::Marker createMarker(const std::string markerName,uint32_t type, geometry_msgs::Pose pose, geometry_msgs::Vector3 scale, std_msgs::ColorRGBA color,  int32_t id, std::string frame_id = std::string("s_map"))
+//register this planner as a BaseGlobalPlanner plugin
+PLUGINLIB_EXPORT_CLASS(global_planner::SosconGlobalPlanner, nav_core::BaseGlobalPlanner)
+
+using namespace std;
+
+namespace global_planner
+{
+
+SosconGlobalPlanner::SosconGlobalPlanner()
+{
+
+}
+
+
+SosconGlobalPlanner::SosconGlobalPlanner(string name, costmap_2d::Costmap2DROS* costmap_ros)
+{
+	initialize(name, costmap_ros);
+}
+
+/*
+visualization_msgs::Marker SosconGlobalPlanner::createMarker(const std::string markerName,uint32_t type, geometry_msgs::Pose pose, geometry_msgs::Vector3 scale, std_msgs::ColorRGBA color,  int32_t id, std::string frame_id = std::string("s_map"))
 {
 
       //marker start point
@@ -53,54 +50,53 @@ visualization_msgs::Marker createMarker(const std::string markerName,uint32_t ty
 
     return marker;
 }
+*/
 
 
-int main(int argc, char **argv) {
-  ros::init(argc, argv, "coverage_path_planning_client");
+bool SosconGlobalPlanner::getMapFromServer()
+{
+	ros::Duration(1).sleep();
+	map_client_ = nh_.serviceClient<nav_msgs::GetMap>("/static_map");
+	nav_msgs::GetMap getMapSrv;
+	if (map_client_.call(getMapSrv)) {
+		req_msg_.map = getMapSrv.response.map;
+		std::cout << "map frame_id: " << req_msg_.map.header.frame_id
+				  << std::endl;
+	} else {
+		ROS_ERROR("Failed to call /static_map service.");
+		return false;
+	}
 
-  ros::NodeHandle n;
-  ros::ServiceClient client =
-      n.serviceClient<coverage_path_planning::GetCoveragePath>(
-          "/sweeper/make_coverage_plan");
+	return true;
+}
 
-  coverage_path_planning::GetCoveragePath srv;
+void SosconGlobalPlanner::initializeParam()
+{
+	// parameters
+	req_msg_.erosion_radius = 0.01; // unit: meter
+	req_msg_.robot_radius = 0.17; // unit: meter
+	req_msg_.occupancy_threshold = 95; // range: 0 ~ 100
 
-  srv.request.erosion_radius = 0.01;     //  unit: meter
-  srv.request.robot_radius = 0.17;        //  unit: meter
-  srv.request.occupancy_threshold = 95;  //  range:0~100
+	req_msg_.start.header.frame_id = req_msg_.map.header.frame_id;  //  must be the same as map's frame_id
 
-  //  get map from mapserver
-  ros::Duration(1).sleep();
-  ros::ServiceClient mapClient =
-      n.serviceClient<nav_msgs::GetMap>("/static_map");
-  nav_msgs::GetMap getMapSrv;
-  if (mapClient.call(getMapSrv)) {
-    srv.request.map = getMapSrv.response.map;
-    std::cout << "map frame_id: " << srv.request.map.header.frame_id
-              << std::endl;
-  } else {
-    ROS_ERROR("Failed to call /static_map service.");
-    return 1;
-  }
+	// start and goal
+	req_msg_.start.pose.position.x = 0.75;
+	req_msg_.start.pose.position.y = 0.75;
+	std::cout << "start frame_id: " << req_msg_.start.header.frame_id
+			<< std::endl;
 
-  //  prepare start and goal
-  geometry_msgs::PoseStamped start;
-  start.header.frame_id =
-      srv.request.map.header.frame_id;  //  must be the same as map's frame_id
-  start.pose.position.x = 0.75;
-  //start.pose.position.y = -0.10;
-  start.pose.position.y = 0.75;
-  srv.request.start = start;
-  std::cout << "start frame_id: " << srv.request.start.header.frame_id
-            << std::endl;
-  srv.request.goal = start;
-  std::cout << "goal frame_id: " << srv.request.goal.header.frame_id
-            << std::endl;
+	req_msg_.goal = req_msg_.start;
+	std::cout << "goal frame_id: " << req_msg_.goal.header.frame_id
+			<< std::endl;
+}
 
-  if (client.call(srv)) {  //  draw the path on rviz
+// FIXME: to do refactor
+// now not used
+/*
+void SosconGlobalPlanner::visualization()
+{
     ros::Publisher marker_pub =
         n.advertise<visualization_msgs::MarkerArray>("/cleanner_planner", 1);
-
 	ros::Publisher path_pub = 
 		n.advertise<nav_msgs::Path>("/path", 1);
 
@@ -174,10 +170,7 @@ int main(int argc, char **argv) {
         /////////
         geometry_msgs::Point p;
         p.x = pose.pose.position.x;
-        p.y = pose.pose.position.y;
-        p.z = 0;
-
-        geometry_msgs::Point arrowHeadPoint;
+        p.y = pose.pose.position.y; p.z = 0; geometry_msgs::Point arrowHeadPoint;
         arrowHeadPoint.x = p.x - lastPoint.x;
         arrowHeadPoint.y = p.y - lastPoint.y;
         arrowHeadPoint.z = 0;
@@ -237,12 +230,48 @@ int main(int argc, char **argv) {
       loop_rate.sleep();
 
     }
-  } else {
-    ROS_ERROR("Failed to call service /sweeper/make_coverage_plan");
-    return 1;
-  }
 
-  //    ros::spin();
-
-  return 0;
 }
+*/
+
+
+void SosconGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
+{
+	if(!initialized_) {
+		// initialize other planner parameters
+		nh_ = ros::NodeHandle("~/" + name);
+
+		//costmap_ros_ = costmap_ros;
+		//costmap_ = costmap_ros_->getCostmap();
+		
+		getMapFromServer();
+
+		initializeParam();
+	
+		initialized_ = true;
+	} else{
+	   ROS_WARN("This planner has already been initialized... doing nothing");
+	}
+}
+
+
+bool SosconGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan) 
+{
+	if(!initialized_){
+		ROS_ERROR("The planner has not been initialized, please call initialize() to use the planner");
+	    return false;
+	}
+
+	
+	if(planning_server_.CoveragePlanService(req_msg_, path_)) {
+		int path_size = path_.poses.size();
+		for(int i = 0; i < path_size; i++) {
+			plan.push_back(path_.poses[i]);
+		}
+
+		//visualization();
+	}
+
+}
+
+};

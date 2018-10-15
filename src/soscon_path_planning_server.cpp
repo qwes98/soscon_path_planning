@@ -1,19 +1,14 @@
-#include <deque>
-#include <ros/ros.h>
-#include <tf/tf.h>
-#include "coverage_path_planning/GetCoveragePath.h"
+#include <soscon_path_planning/soscon_path_planning_server.h>
 #include "coveragepathplanning.hpp"
 
-namespace coverage_path_planning {
-
-void MapToWorld(
+void PathPlanningServer::MapToWorld(
     double resolution, double origin_x, double origin_y, unsigned int mx,
     unsigned int my, double *wx, double *wy) {
   *wx = origin_x + (mx + 0.5) * resolution;
   *wy = origin_y + (my + 0.5) * resolution;
 }
 
-bool WorldToMap(
+bool PathPlanningServer::WorldToMap(
     double resolution, double origin_x, double origin_y, unsigned int size_x,
     unsigned int size_y, double wx, double wy, int *mx, int *my) {
   if (wx < origin_x || wy < origin_y)
@@ -28,9 +23,7 @@ bool WorldToMap(
   return false;
 }
 
-bool CoveragePlanService(
-    coverage_path_planning::GetCoveragePath::Request &req,      // NOLINT
-    coverage_path_planning::GetCoveragePath::Response &resp) {  // NOLINT
+bool PathPlanningServer::CoveragePlanService(global_planner::RequestMsg &req, nav_msgs::Path &path) {
   if (req.erosion_radius < 0) {
     ROS_ERROR("erosion_radius < 0");
     return false;
@@ -62,8 +55,7 @@ bool CoveragePlanService(
   if (req.map.info.width * req.map.info.height != req.map.data.size()) {
     ROS_ERROR("invalid map: width * height != data size");
     return false;
-  }
-
+  } 
   //  build start and goal
   cv::Point start, goal;
   if (false == WorldToMap(
@@ -128,7 +120,7 @@ bool CoveragePlanService(
   cv::Point cur;
   //  first point
   path.pop_front();
-  resp.plan.poses.push_back(req.start);
+  plan.poses.push_back(req.start);
   //  not last point
   double target_yaw, next_x, next_y;
   while (path.size() > 1) {
@@ -152,31 +144,12 @@ bool CoveragePlanService(
         180 / CV_PI;
     target.pose.orientation = tf::createQuaternionMsgFromYaw(target_yaw);
 
-    resp.plan.poses.push_back(target);
+    plan.poses.push_back(target);
   }
   //  last point
   path.pop_front();
-  // FIXME: a star algorithm
-  resp.plan.poses.push_back(req.goal);
+  plan.poses.push_back(req.goal);
 
   return true;
 }
 
-};  // namespace coverage_path_planning
-
-int main(int argc, char **argv) {
-  ros::init(argc, argv, "coverage_path_planning_node");
-
-  ros::NodeHandle private_nh("~");
-
-  //  advertise a service for getting a coverage plan
-  ros::ServiceServer make_coverage_plan_srv = private_nh.advertiseService(
-      "/sweeper/make_coverage_plan",
-      coverage_path_planning::CoveragePlanService);
-
-  ROS_INFO("Ready to make coverage plan.");
-
-  ros::spin();
-
-  return (0);
-}
