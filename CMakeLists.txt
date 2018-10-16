@@ -110,9 +110,9 @@ find_package(OpenCV REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES coverage_path_planning
-#  CATKIN_DEPENDS actionlib geometry_msgs message_generation nav_core nav_msgs pluginlib roscpp std_srvs tf
-#  DEPENDS system_lib
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS actionlib geometry_msgs message_generation nav_core nav_msgs pluginlib roscpp std_srvs tf
+  DEPENDS system_lib
 )
 
 ###########
@@ -132,10 +132,24 @@ include_directories(
 #   src/${PROJECT_NAME}/coverage_path_planning.cpp
 # )
 
-add_library(global_planner_lib src/soscon_global_planner.cpp)
-add_dependencies(global_planner_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(global_planner_lib
+add_library(${PROJECT_NAME} src/soscon_global_planner.cpp)
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}
 	${catkin_LIBRARIES}
+)
+
+install(TARGETS ${PROJECT_NAME}
+ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(DIRECTORY include/${PROJECT_NAME}/
+DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+PATTERN ".svn" EXCLUDE
+)
+
+install(FILES global_planner_plugin.xml
+DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 
