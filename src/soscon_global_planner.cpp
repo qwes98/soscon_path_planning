@@ -11,9 +11,7 @@ namespace global_planner
 {
 
 SosconGlobalPlanner::SosconGlobalPlanner()
-{
-	ROS_ERROR("Default constructor is called in global planner. this is not implemented. have to use another constructor");
-}
+{}
 
 
 SosconGlobalPlanner::SosconGlobalPlanner(string name, costmap_2d::Costmap2DROS* costmap_ros)
