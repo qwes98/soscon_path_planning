@@ -1,5 +1,7 @@
 #include <soscon_path_planning/soscon_path_planning_server.h>
 #include "coveragepathplanning.hpp"
+#include <iostream>
+using namespace std;
 
 void PathPlanningServer::MapToWorld(
     double resolution, double origin_x, double origin_y, unsigned int mx,
@@ -23,7 +25,7 @@ bool PathPlanningServer::WorldToMap(
   return false;
 }
 
-bool PathPlanningServer::CoveragePlanService(global_planner::RequestMsg &req, nav_msgs::Path &path) {
+bool PathPlanningServer::CoveragePlanService(RequestMsg &req, std::vector<geometry_msgs::PoseStamped>& plan) {
   if (req.erosion_radius < 0) {
     ROS_ERROR("erosion_radius < 0");
     return false;
@@ -88,6 +90,7 @@ bool PathPlanningServer::CoveragePlanService(global_planner::RequestMsg &req, na
   cv::Mat binarization;
   cv::threshold(
       map, binarization, req.occupancy_threshold, 255, cv::THRESH_BINARY_INV);
+cout << "threshold func called" << endl;
 
   //  erosion
   cv::Mat erosion, element;
@@ -116,14 +119,16 @@ bool PathPlanningServer::CoveragePlanService(global_planner::RequestMsg &req, na
   }
 
   //  coordinate mapping
-  geometry_msgs::PoseStamped target = req.start;
+  //geometry_msgs::PoseStamped target = req.start;
   cv::Point cur;
+
   //  first point
   path.pop_front();
-  plan.poses.push_back(req.start);
+  plan.push_back(req.start);
   //  not last point
   double target_yaw, next_x, next_y;
   while (path.size() > 1) {
+    geometry_msgs::PoseStamped target = req.goal;
     cur = path.front();
     path.pop_front();
 
@@ -144,11 +149,11 @@ bool PathPlanningServer::CoveragePlanService(global_planner::RequestMsg &req, na
         180 / CV_PI;
     target.pose.orientation = tf::createQuaternionMsgFromYaw(target_yaw);
 
-    plan.poses.push_back(target);
+    plan.push_back(target);
   }
   //  last point
   path.pop_front();
-  plan.poses.push_back(req.goal);
+  plan.push_back(req.goal);
 
   return true;
 }

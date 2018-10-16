@@ -38,6 +38,7 @@ protected:
 	//visualization_msgs::Marker createMarker(const std::string markerName,uint32_t type, geometry_msgs::Pose pose, geometry_msgs::Vector3 scale, std_msgs::ColorRGBA color,  int32_t id, std::string frame_id = std::string("s_map"));
 	bool getMapFromServer();
 	void initializeParam();
+	void prepareStartAndGoal(const geometry_msgs::PoseStamped& start);
 
 	//void visualization();
 
@@ -47,7 +48,6 @@ private:
 	ros::NodeHandle nh_;
 
 	RequestMsg req_msg_;
-	nav_msgs::Path path_;
 
 	PathPlanningServer planning_server_;
 

@@ -131,10 +131,11 @@ include_directories(
 #   src/${PROJECT_NAME}/coverage_path_planning.cpp
 # )
 
-add_library(${PROJECT_NAME} src/soscon_global_planner.cpp)
+add_library(${PROJECT_NAME} src/soscon_global_planner.cpp src/soscon_path_planning_server.cpp src/coveragepathplanning.cpp)
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}
 	${catkin_LIBRARIES}
+	${OpenCV_LIBRARIES}
 )
 
 install(TARGETS ${PROJECT_NAME}

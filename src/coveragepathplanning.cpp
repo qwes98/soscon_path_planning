@@ -9,6 +9,7 @@
 #include "coveragepathplanning.hpp"
 #include <queue>
 #include <stack>
+#include <iostream>
 
 using namespace cv;   //  NOLINT
 using namespace std;  //  NOLINT
@@ -613,6 +614,7 @@ void insert_a_star_path(const cv::Mat &_binary, std::deque<cv::Point> &_path, in
 // @param _radius number of pixel for robot radius
 int cpp::ZigZagPathPlanning(const cv::Mat &_binary, 
   const cv::Point &_tar, const cv::Point &_goal, std::deque<cv::Point> &_path, int _radius) {
+	cout << "ZigZagPathPlanning called" << endl;
 	// binary -> searched area pixel value will be 0
     Mat binary = _binary.clone();
     stack<Candidate> trace;

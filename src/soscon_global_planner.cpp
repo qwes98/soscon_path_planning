@@ -74,18 +74,19 @@ void SosconGlobalPlanner::initializeParam()
 	req_msg_.erosion_radius = 0.01; // unit: meter
 	req_msg_.robot_radius = 0.17; // unit: meter
 	req_msg_.occupancy_threshold = 95; // range: 0 ~ 100
+}
 
-	req_msg_.start.header.frame_id = req_msg_.map.header.frame_id;  //  must be the same as map's frame_id
+void SosconGlobalPlanner::prepareStartAndGoal(const geometry_msgs::PoseStamped& start)
+{
+
+	//req_msg_.start.header.frame_id = req_msg_.map.header.frame_id;  //  must be the same as map's frame_id
 
 	// start and goal
+	req_msg_.start = start;
 	req_msg_.start.pose.position.x = 0.75;
 	req_msg_.start.pose.position.y = 0.75;
-	std::cout << "start frame_id: " << req_msg_.start.header.frame_id
-			<< std::endl;
 
 	req_msg_.goal = req_msg_.start;
-	std::cout << "goal frame_id: " << req_msg_.goal.header.frame_id
-			<< std::endl;
 }
 
 // FIXME: to do refactor
@@ -260,17 +261,24 @@ bool SosconGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, cons
 	    return false;
 	}
 
-	
-	if(planning_server_.CoveragePlanService(req_msg_, path_)) {
-		int path_size = path_.poses.size();
+	prepareStartAndGoal(goal);
+
+	//nav_msgs::Path path;
+
+	if(planning_server_.CoveragePlanService(req_msg_, plan)) {
+		/*
+		int path_size = path.poses.size();
 		for(int i = 0; i < path_size; i++) {
-			plan.push_back(path_.poses[i]);
+			plan.push_back(path.poses[i]);
 		}
+*/
 
 		//visualization();
 	} else {
 		ROS_WARN("The global planner could not get path from planning server");
 	}
+
+	return true;
 
 }
 

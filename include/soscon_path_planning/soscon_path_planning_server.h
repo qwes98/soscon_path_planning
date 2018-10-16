@@ -1,7 +1,9 @@
 #include <deque>
 #include <ros/ros.h>
 #include <tf/tf.h>
-#include <nav_msgs/Path.h>
+//#include <nav_msgs/Path.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <vector>
 #include <soscon_path_planning/request_msg.h>
 
 #ifndef PATH_PLANNER_SERVER_H
@@ -10,7 +12,7 @@
 class PathPlanningServer
 {
 public:
-	bool CoveragePlanService(RequestMsg &req, nav_msgs::Path &path);
+	bool CoveragePlanService(RequestMsg &req, std::vector<geometry_msgs::PoseStamped> &path);
 
 protected:
 	void MapToWorld(

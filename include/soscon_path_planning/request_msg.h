@@ -1,3 +1,6 @@
+#include <nav_msgs/OccupancyGrid.h>
+#include <geometry_msgs/PoseStamped.h>
+
 #ifndef REQUEST_MSG_H
 #define REQUEST_MSG_H
 
@@ -6,7 +9,7 @@ struct RequestMsg
 	// parematers
 	double erosion_radius;
 	double robot_radius;
-	char occupancy_threshold;
+	double occupancy_threshold;
 
 	// map
 	nav_msgs::OccupancyGrid map;
