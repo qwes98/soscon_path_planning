@@ -12,7 +12,7 @@ namespace global_planner
 
 SosconGlobalPlanner::SosconGlobalPlanner()
 {
-
+	ROS_ERROR("Default constructor is called in global planner. this is not implemented. have to use another constructor");
 }
 
 
@@ -270,6 +270,8 @@ bool SosconGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, cons
 		}
 
 		//visualization();
+	} else {
+		ROS_WARN("The global planner could not get path from planning server");
 	}
 
 }
