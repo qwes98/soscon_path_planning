@@ -133,10 +133,10 @@ include_directories(
 # )
 
 add_library(global_planner_lib src/soscon_global_planner.cpp)
-#add_dependencies(global_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(global_planner
-#	${catkin_LIBRARIES}
-#)
+add_dependencies(global_planner_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(global_planner_lib
+	${catkin_LIBRARIES}
+)
 
 
 ## Add cmake target dependencies of the library
