@@ -10,7 +10,6 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   geometry_msgs
-  message_generation
   nav_core
   nav_msgs
   pluginlib
@@ -111,7 +110,7 @@ find_package(OpenCV REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS actionlib geometry_msgs message_generation nav_core nav_msgs pluginlib roscpp std_srvs tf
+  CATKIN_DEPENDS actionlib geometry_msgs nav_core nav_msgs pluginlib roscpp std_srvs tf
   DEPENDS system_lib
 )
 
