@@ -60,6 +60,7 @@ protected:
 
 private:
 	bool initialized_ = false;
+	bool made_path_ = false;
 	ros::ServiceClient map_client_;
 	ros::NodeHandle nh_;
 	ros::Publisher plan_pub_;

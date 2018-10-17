@@ -475,10 +475,11 @@ ROS_ERROR("The planner has not been initialized, please call initialize() to use
 return false;
 }
 
+if(!made_path_) {
+
 	prepareStartAndGoal(goal);
 
 	//plan.clear();
- 
 	/*
 plan.push_back(start);
    for (int i=0; i<20; i++){
@@ -608,7 +609,29 @@ plan.push_back(start);
   path.pop_front();
   plan.push_back(goal);
 
+
+  /*
+  plan.clear();
+
+plan.push_back(start);
+   for (int i=0; i<400; i++){
+        geometry_msgs::PoseStamped new_goal = goal;
+        tf::Quaternion goal_quat = tf::createQuaternionFromYaw(1.54);
+   
+         new_goal.pose.position.x = start.pose.position.x+(0.05*i);
+         new_goal.pose.position.y = start.pose.position.y+(0.05*i);
+   
+         new_goal.pose.orientation.x = goal_quat.x();
+         new_goal.pose.orientation.y = goal_quat.y();
+         new_goal.pose.orientation.z = goal_quat.z();
+         new_goal.pose.orientation.w = goal_quat.w();
+   
+      plan.push_back(new_goal);
+      }
+   plan.push_back(goal);
+
   cout << "move_base path size: " << plan.size() << endl;
+  */
 
 
 	//CoveragePlanService(req_msg_, plan);
@@ -650,6 +673,10 @@ plan.push_back(start);
 
 		  */
 
+
+	made_path_ = true;
+
+}//if statement
 
 	return true;
 
