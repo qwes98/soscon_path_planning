@@ -15,7 +15,8 @@ struct RequestMsg
 	nav_msgs::OccupancyGrid map;
 
 	// start, end point
-	geometry_msgs::PoseStamped start, goal;
+	geometry_msgs::PoseStamped start;
+	geometry_msgs::PoseStamped goal;
 };
 
 #endif

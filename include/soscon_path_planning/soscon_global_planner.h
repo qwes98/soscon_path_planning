@@ -11,6 +11,7 @@
 #include <base_local_planner/costmap_model.h>
 #include <soscon_path_planning/soscon_path_planning_server.h>
 #include <soscon_path_planning/request_msg.h>
+#include <deque>
 
 using std::string;
 
@@ -19,6 +20,8 @@ using std::string;
 
 namespace global_planner
 {
+
+class PathPlanningServer;
 
 class SosconGlobalPlanner : public nav_core::BaseGlobalPlanner 
 {
@@ -39,6 +42,19 @@ protected:
 	bool getMapFromServer();
 	void initializeParam();
 	void prepareStartAndGoal(const geometry_msgs::PoseStamped& start);
+	void publishPlan(const std::vector<geometry_msgs::PoseStamped>& path);
+
+
+	//bool CoveragePlanService(RequestMsg &req, std::vector<geometry_msgs::PoseStamped> &plan);
+
+	void MapToWorld(
+    double resolution, double origin_x, double origin_y, unsigned int mx,
+    unsigned int my, double *wx, double *wy); 
+
+	bool WorldToMap(
+    double resolution, double origin_x, double origin_y, unsigned int size_x,
+    unsigned int size_y, double wx, double wy, int *mx, int *my);
+
 
 	//void visualization();
 
@@ -46,10 +62,9 @@ private:
 	bool initialized_ = false;
 	ros::ServiceClient map_client_;
 	ros::NodeHandle nh_;
+	ros::Publisher plan_pub_;
 
 	RequestMsg req_msg_;
-
-	PathPlanningServer planning_server_;
 
 	//costmap_2d::Costmap2DROS* costmap_ros_;
 	//costmap_2d::Costmap2D* costmap_;

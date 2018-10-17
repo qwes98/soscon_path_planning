@@ -1,7 +1,11 @@
 #include <soscon_path_planning/soscon_path_planning_server.h>
 #include "coveragepathplanning.hpp"
 #include <iostream>
+#include <tf/tf.h>
 using namespace std;
+
+namespace global_planner
+{
 
 void PathPlanningServer::MapToWorld(
     double resolution, double origin_x, double origin_y, unsigned int mx,
@@ -26,6 +30,27 @@ bool PathPlanningServer::WorldToMap(
 }
 
 bool PathPlanningServer::CoveragePlanService(RequestMsg &req, std::vector<geometry_msgs::PoseStamped>& plan) {
+
+	// 나의 plan_pub은 publish했는데 move base는 안함
+  plan.push_back(req.start);
+     for (int i=0; i<20; i++){
+	      geometry_msgs::PoseStamped new_goal = req.goal;
+	      tf::Quaternion goal_quat = tf::createQuaternionFromYaw(1.54);
+	 
+	       new_goal.pose.position.x = -2.5+(0.05*i);
+	       new_goal.pose.position.y = -3.5+(0.05*i);
+	 
+	       new_goal.pose.orientation.x = goal_quat.x();
+	       new_goal.pose.orientation.y = goal_quat.y();
+	       new_goal.pose.orientation.z = goal_quat.z();
+	       new_goal.pose.orientation.w = goal_quat.w();
+	 
+	    plan.push_back(new_goal);
+	    }
+	    plan.push_back(req.goal);
+
+		return true;
+
   if (req.erosion_radius < 0) {
     ROS_ERROR("erosion_radius < 0");
     return false;
@@ -77,6 +102,7 @@ bool PathPlanningServer::CoveragePlanService(RequestMsg &req, std::vector<geomet
     return false;
   }
 
+
   //  build map
   for (int i = 0; i < req.map.data.size(); ++i) {
     if (-1 == req.map.data[i]) {  //  replace unknown with 100
@@ -90,7 +116,6 @@ bool PathPlanningServer::CoveragePlanService(RequestMsg &req, std::vector<geomet
   cv::Mat binarization;
   cv::threshold(
       map, binarization, req.occupancy_threshold, 255, cv::THRESH_BINARY_INV);
-cout << "threshold func called" << endl;
 
   //  erosion
   cv::Mat erosion, element;
@@ -137,17 +162,26 @@ cout << "threshold func called" << endl;
         req.map.info.resolution, req.map.info.origin.position.x,
         req.map.info.origin.position.y, cur.x, cur.y, &target.pose.position.x,
         &target.pose.position.y);
+	//target.pose.position.x = cur.x;
+	//target.pose.position.y = cur.y;
+
 
     //  fill orientation
     MapToWorld(
         req.map.info.resolution, req.map.info.origin.position.x,
         req.map.info.origin.position.y, path.front().x, path.front().y, &next_x,
         &next_y);
+	//next_x = cur.x;
+	//next_y = cur.y;
+
+
     target_yaw =
         atan2(
             next_y - target.pose.position.y, next_x - target.pose.position.x) *
         180 / CV_PI;
     target.pose.orientation = tf::createQuaternionMsgFromYaw(target_yaw);
+
+	//target.header.stamp = ros::Time::now();
 
     plan.push_back(target);
   }
@@ -158,3 +192,4 @@ cout << "threshold func called" << endl;
   return true;
 }
 
+};
